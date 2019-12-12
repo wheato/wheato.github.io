@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        虚拟摇杆（Joystick）的实现原理.md - 麦子前端铺
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> Code with my mind, code for my dream! </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar ">
+            <img src="/img/avatar.jpg" />
+        </div>
+        <div class="name">
+            <i>Wheato Wu</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#虚拟摇杆（Joystick）的实现原理"><span class="toc-text">虚拟摇杆（Joystick）的实现原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#三个组成对象"><span class="toc-text">三个组成对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#输出值的计算方式"><span class="toc-text">输出值的计算方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#距离"><span class="toc-text">距离</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#角度"><span class="toc-text">角度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#摇杆的交互实现"><span class="toc-text">摇杆的交互实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#摇杆按钮"><span class="toc-text">摇杆按钮</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#摇杆滑块"><span class="toc-text">摇杆滑块</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#方向"><span class="toc-text">方向</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#回弹"><span class="toc-text">回弹</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#事件的响应"><span class="toc-text">事件的响应</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#TouchBegin"><span class="toc-text">TouchBegin</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#TouchMove"><span class="toc-text">TouchMove</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#TouchEnd"><span class="toc-text">TouchEnd</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DEMO-演示（JS-实现）"><span class="toc-text">DEMO 演示（JS 实现）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取输入值之后"><span class="toc-text">获取输入值之后</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#计算运动速度"><span class="toc-text">计算运动速度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#计算运动方向"><span class="toc-text">计算运动方向</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PS"><span class="toc-text">PS</span></a></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> Code with my mind, code for my dream! </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        虚拟摇杆（Joystick）的实现原理.md
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2019-12-10 20:58:50</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#笔记" title="笔记">笔记</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content no-indent">
+        <h1 id="虚拟摇杆（Joystick）的实现原理"><a href="#虚拟摇杆（Joystick）的实现原理" class="headerlink" title="虚拟摇杆（Joystick）的实现原理"></a>虚拟摇杆（Joystick）的实现原理</h1><h2 id="三个组成对象"><a href="#三个组成对象" class="headerlink" title="三个组成对象"></a>三个组成对象</h2><p>在移动端，用虚拟摇杆来控制物体的移动是一种体验非常棒的交互方式。这个笔记中，注重分享摇杆的实现原理，与语言和平台无关，后面会有一个用 JS 实现的在线演示 Demo。</p>
+<p>摇杆通常由三个部分组成：摇杆按钮、摇杆滑块、滑块运动范围。</p>
+<p>滑块运动范围决定了滑块最大偏移摇杆按钮的长度，也决定了<strong>第一次触摸事件的响应范围</strong>。</p>
+<p>如下图所示，左边是没有事件输入时的样子，通常虚线框的响应范围是透明的，大小根据业务交互来定，而滑块在没有事件输入时是不显示的。右边是触发 Touch 事件后，滑块显示在手指滑动的位置与方向。</p>
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1g9skjcyrkwj318g0m8mym.jpg" alt="图示1"></p>
+<h2 id="输出值的计算方式"><a href="#输出值的计算方式" class="headerlink" title="输出值的计算方式"></a>输出值的计算方式</h2><p>从上图的右边可以看出，在摇杆的运动中，我们能得到两个值，一个是原点（第一次点击屏幕的坐标点，这里我们假设是摇杆按钮的中心点）与滑块中心点的距离。以这个距离为半径，摇杆按钮中心为圆心，画一个圆，能得到滑块在这个圆上的角度。</p>
+<p>这个距离值可以反映到要控制的物体的运动速度，角度可以反映到我们要控制的物体的运动方向。</p>
+<p><img src="https://tva1.sinaimg.cn/large/006tNbRwgy1g9skjfg87ij318g0m80u6.jpg" alt="图示2"></p>
+<h3 id="距离"><a href="#距离" class="headerlink" title="距离"></a>距离</h3><p>距离的求出比较简单，计算两个点的坐标之间的距离即可，此时滑块运动范围是这个距离的最大值，我们可以根据这个最大值与距离的比例来决定我们的运动速度。以 JS 为例：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Math</span>.sqrt(</span><br><span class="line">(y2 - y1) * (y2 - y1) +</span><br><span class="line">(x2 - x1) * (x2 - x1)</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<h3 id="角度"><a href="#角度" class="headerlink" title="角度"></a>角度</h3><p>根据三角函数可以得到 α 的角度，这个角度就是我们要输出的值，计算步骤：</p>
+<ol>
+<li>求出 Delta Y，也就是绿色线条的长度，<code>deltaY = y2 - y1</code></li>
+<li>求出 Delta X，也就是黄色线条的长度，<code>deltaX = x2 - x1</code></li>
+<li>用反三角函数公式计算 α 的弧度 radian，以 JS 为例： <code>Math.atan(deltaY, deltaX)</code></li>
+<li>再转角度  <code>degree = radian * 180 / PI</code></li>
+</ol>
+<p>这里得到的角度值是以 X 轴为零点，如果我们这里是以 12 点钟方向为零点，这里计算的角度还需要再加 90 度再模 360。具体可以根据业务的需要做修改。</p>
+<h2 id="摇杆的交互实现"><a href="#摇杆的交互实现" class="headerlink" title="摇杆的交互实现"></a>摇杆的交互实现</h2><h3 id="摇杆按钮"><a href="#摇杆按钮" class="headerlink" title="摇杆按钮"></a>摇杆按钮</h3><p>大部分的按钮，只是一个静态的 UI，告诉用户这里有一个虚拟摇杆，不需要在交互中做出修改。如果原点是动态的，那摇杆按钮需要移动到原点坐标。</p>
+<h3 id="摇杆滑块"><a href="#摇杆滑块" class="headerlink" title="摇杆滑块"></a>摇杆滑块</h3><h4 id="方向"><a href="#方向" class="headerlink" title="方向"></a>方向</h4><p>滑块的方向总是等于我们手指相对原点（摇杆按钮中心点）运动的方向。所以可以用上面获取的角度值来修改滑块的旋转角度。</p>
+<h4 id="回弹"><a href="#回弹" class="headerlink" title="回弹"></a>回弹</h4><p>当抬起手指后，滑块需要回弹到摇杆按钮的中心点，这里的可以使用各个平台下的 tween 类库来实现缓动回弹。上面提到的角度旋转为了更好的感官体验，也可以使用 tween 类库来做。</p>
+<h3 id="事件的响应"><a href="#事件的响应" class="headerlink" title="事件的响应"></a>事件的响应</h3><p>虚拟摇杆的实现涉及到这三个事件，可能各个平台略有不同，下面简单的列出每个事件要处理的逻辑。</p>
+<h4 id="TouchBegin"><a href="#TouchBegin" class="headerlink" title="TouchBegin"></a>TouchBegin</h4><ol>
+<li>获取第一个手指点击的位置</li>
+<li>记录坐标点，定为原点</li>
+<li>显示滑块</li>
+<li>把滑块的坐标设置成原点坐标</li>
+<li>如果移动摇杆按钮，记录摇杆按钮当前位置为中心点，将摇杆按钮移动到原点</li>
+</ol>
+<h4 id="TouchMove"><a href="#TouchMove" class="headerlink" title="TouchMove"></a>TouchMove</h4><ol>
+<li>获取新的手指位置</li>
+<li>获取上一次手指位置</li>
+<li>计算差值，得出新的滑块位置</li>
+<li>计算新位置与原点的角度</li>
+<li>计算新位置与原点的距离</li>
+<li>设置滑块旋转角度</li>
+<li>防止超出滑块的最大距离，修正新的滑块位置</li>
+<li>将滑块移动到新的位置</li>
+<li>保存当前手指位置</li>
+</ol>
+<h4 id="TouchEnd"><a href="#TouchEnd" class="headerlink" title="TouchEnd"></a>TouchEnd</h4><ol>
+<li>回弹滑块</li>
+<li>滑块回弹结束后消失</li>
+<li>如果移动滑块按钮，将摇杆按钮重置回中心点</li>
+</ol>
+<h2 id="DEMO-演示（JS-实现）"><a href="#DEMO-演示（JS-实现）" class="headerlink" title="DEMO 演示（JS 实现）"></a>DEMO 演示（JS 实现）</h2><iframe src="https://joystick.stackblitz.io/" width="700px" height="500px" frameborder="0" scrolling="no"> </iframe>
+
+<p><a href="https://stackblitz.com/edit/joystick" target="_blank" rel="noopener">代码地址</a></p>
+<h2 id="获取输入值之后"><a href="#获取输入值之后" class="headerlink" title="获取输入值之后"></a>获取输入值之后</h2><p>根据具体业务，可以自行封装几个事件，用于值的输出。</p>
+<h3 id="计算运动速度"><a href="#计算运动速度" class="headerlink" title="计算运动速度"></a>计算运动速度</h3><p>根据滑块离原点的距离与最大运动范围的比例，我们可以对速度进行线性的关联，也可以分段离散来实现速度状态机。</p>
+<h3 id="计算运动方向"><a href="#计算运动方向" class="headerlink" title="计算运动方向"></a>计算运动方向</h3><p>根据速度，再结合方向角度，利用三角函数可以计算 x, y 的运动分量。用分量计算新的物体位置。</p>
+<h2 id="PS"><a href="#PS" class="headerlink" title="PS"></a>PS</h2><p>后续会使用 Rx.js 来实现这个组件，并对其进行封装。</p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+        <li>
+            <a target="_blank" href="https://www.zhihu.com/people/wheato">
+                            <span class="fa-stack fa-lg">
+                                 <i class="iconfont icon-zhihu"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+        <li>
+            <a target="_blank" href="http://weibo.com/wheato">
+                            <span class="fa-stack fa-lg">
+                                  <i class="iconfont icon-weibo"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/wheato">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+</html>
