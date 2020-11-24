@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        Vue.js SSR Step by Step (3) - 改造 vue/webpack 脚手架 - 麦子前端铺
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> Code with my mind, code for my dream! </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar radius">
+            <img src="/img/avatar.jpg" />
+        </div>
+        <div class="name">
+            <i>Wheato Wu</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#修改代码"><span class="toc-text">修改代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增加-server-js"><span class="toc-text">增加 server.js</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改-webpack-conf-js"><span class="toc-text">修改 webpack.*.conf.js</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改-dev-server-js"><span class="toc-text">修改 dev-server.js</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改-build-js"><span class="toc-text">修改 build.js</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Vue-js-SSR-Step-by-Step-系列"><span class="toc-text">Vue.js SSR Step by Step 系列</span></a></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> Code with my mind, code for my dream! </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        Vue.js SSR Step by Step (3) - 改造 vue/webpack 脚手架
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2017-11-10 17:28:49</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#Vue" title="Vue">Vue</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content no-indent">
+        <p>通过前面两篇文章，写了一个简单的支持 vue 同构的 webpack 配置，但是还没有 dev server，不能热更新和实时编译，用于开发还是非常的麻烦。</p>
+<p>Vue 官方的 webpack 脚手架只是针对客户端的，功能强大，配置齐全。所以在这个官方脚手架的基础上改了一个支持 #SSR# 的版本，在改的过程中参考了 <a href="https://github.com/vuejs/vue-hackernews-2.0/tree/master/" target="_blank" rel="noopener">GitHub - vuejs/vue-hackernews-2.0: HackerNews clone built with Vue 2.0, vue-router &amp; vuex, with server-side rendering</a>。</p>
+<p>改过后的源码在 <a href="https://github.com/wheato/vue-ssr-boilerplate/tree/master" target="_blank" rel="noopener">Github</a> 上，使用方式：<code>vue init wheato/vue-ssr-boilerplate project-name</code>。接下来简单的说说这个修改的过程。</p>
+<h2 id="修改代码"><a href="#修改代码" class="headerlink" title="修改代码"></a>修改代码</h2><p>这一部分主要是增加两个入口 ，修改内容和之前文章还有官方文档一样。如果有用到 vue-router 还要修改 route.js，具体修改可以看官方文档。有了 vue-router 我们就可以在组件里面定义静态方法，服务端调用注入数据。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Foo.vue</span></span><br><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div&gt;</span><br><span class="line">    &lt;h2&gt;Foo&lt;<span class="regexp">/h2&gt;</span></span><br><span class="line"><span class="regexp">  &lt;/</span>div&gt;</span><br><span class="line">&lt;<span class="regexp">/template&gt;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">&lt;script&gt;</span></span><br><span class="line"><span class="regexp">export default &#123;</span></span><br><span class="line"><span class="regexp">  preFetch(data) &#123;</span></span><br><span class="line"><span class="regexp">    console.log(data)</span></span><br><span class="line"><span class="regexp">  &#125;,</span></span><br><span class="line"><span class="regexp">  data () &#123;</span></span><br><span class="line"><span class="regexp">    return &#123;&#125;</span></span><br><span class="line"><span class="regexp">  &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">&lt;/</span>script&gt;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// entry-server.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; createApp &#125; <span class="keyword">from</span> <span class="string">'./app.js'</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> context =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; app, router &#125; = createApp()</span><br><span class="line">    router.push(<span class="string">'/foo'</span>)</span><br><span class="line">    router.onReady(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> matchedComponents = router.getMatchedComponents()</span><br><span class="line">      matchedComponents.forEach(<span class="function"><span class="params">p</span> =&gt;</span> &#123;</span><br><span class="line">        p.preFetch(<span class="string">'数据'</span>)</span><br><span class="line">      &#125;)</span><br><span class="line">      resolve(app)</span><br><span class="line">    &#125;, reject)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="增加-server-js"><a href="#增加-server-js" class="headerlink" title="增加 server.js"></a>增加 server.js</h2><p>server.js 基本上就是从 vue-hackernews-2.0 种复制过来的，做了一些删减，使用 express，也可以使用 Koa。</p>
+<h2 id="修改-webpack-conf-js"><a href="#修改-webpack-conf-js" class="headerlink" title="修改 webpack.*.conf.js"></a>修改 webpack.*.conf.js</h2><p>webpack.prod.conf.js 的修改点：</p>
+<ul>
+<li>webpack.prod.conf.js 改成 webpack.server.conf.js；</li>
+<li>去掉 html-webpack-plugin，用了 SSR，不需要在把资源自动注入 html 文件中了；</li>
+<li>把压缩 css 和 js 插件放到条件判断中，只有生产环境才压缩文件；</li>
+<li>修改入口；</li>
+<li>增加 <code>process.env.VUE_ENV = ‘client’</code>；</li>
+<li>增加 vue-server-renderer client 端插件。</li>
+</ul>
+<p>增加 webpack.server.conf.js：</p>
+<ul>
+<li>在 client 基础上去掉 CommonsChunkPlugin；</li>
+<li>修改入口文件，和输出文件，编译目标平台；</li>
+<li>增加 vue-server-renderer server 端插件；</li>
+<li>增加 extract-text-webpack-plugin，不把 css 编译进 server 端中；</li>
+<li>增加 <code>process.env.VUE_ENV = ‘server’</code>。</li>
+</ul>
+<p>webpack.dev.conf.js 中增加 vue-server-renderer client 端插件，修改入口为 entry-client.js。</p>
+<h2 id="修改-dev-server-js"><a href="#修改-dev-server-js" class="headerlink" title="修改 dev-server.js"></a>修改 dev-server.js</h2><p>dev-server.js 这部分修改挺大的， 其中 client 的配置使用 webpack.dev.conf.js。</p>
+<p>Client 部分没有太多的改动，必须要使用的两个插件 webpack-dev-middleware 和 webpack-hot-middleware。增加了 clientCompiler done 事件的回调，把编译好的 client-bundle 文件保存进 clientManifest 中，页面刷新的时候服务器渲染就能同步到之前修改过的内容。<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// dev middleware</span></span><br><span class="line"><span class="keyword">var</span> clientCompiler = webpack(clientWebpackConfig)</span><br><span class="line"><span class="keyword">var</span> devMiddleware = <span class="built_in">require</span>(<span class="string">'webpack-dev-middleware'</span>)(clientCompiler, &#123;</span><br><span class="line">  publicPath: clientWebpackConfig.output.publicPath,</span><br><span class="line">  noInfo: <span class="literal">true</span></span><br><span class="line">&#125;)</span><br><span class="line">app.use(devMiddleware)</span><br><span class="line">clientCompiler.plugin(<span class="string">'done'</span>, <span class="function"><span class="params">stats</span> =&gt;</span> &#123;</span><br><span class="line">  stats = stats.toJson()</span><br><span class="line">  stats.errors.forEach(<span class="function"><span class="params">err</span> =&gt;</span> <span class="built_in">console</span>.error(err))</span><br><span class="line">  stats.warnings.forEach(<span class="function"><span class="params">err</span> =&gt;</span> <span class="built_in">console</span>.warn(err))</span><br><span class="line">  <span class="keyword">if</span> (stats.errors.length) <span class="keyword">return</span></span><br><span class="line">  clientManifest = <span class="built_in">JSON</span>.parse(readFile(</span><br><span class="line">    devMiddleware.fileSystem,</span><br><span class="line">    <span class="string">'vue-ssr-client-manifest.json'</span></span><br><span class="line">  ))</span><br><span class="line">  update()</span><br><span class="line">&#125;)</span><br><span class="line"><span class="comment">// hot middleware</span></span><br><span class="line"><span class="keyword">var</span> hotMiddleware = <span class="built_in">require</span>(<span class="string">'webpack-hot-middleware'</span>)(clientCompiler, &#123; heartbeat: <span class="number">5000</span> &#125;)</span><br><span class="line">app.use(hotMiddleware)</span><br></pre></td></tr></table></figure></p>
+<p>Server 部分中，devMiddleware 的代码更新不到服务端，所以要添加 watch 事件，实时编译 server-bundle。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">// watch and <span class="keyword">update</span> <span class="keyword">server</span> renderer</span><br><span class="line"><span class="keyword">var</span> serverCompiler = webpack(serverWebpackConfig)</span><br><span class="line"><span class="keyword">var</span> mfs = <span class="keyword">new</span> MFS()</span><br><span class="line">serverCompiler.outputFileSystem = mfs</span><br><span class="line">serverCompiler.watch(&#123;&#125;, (err, stats) =&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span> (err) throw err</span><br><span class="line">  stats = stats.toJson()</span><br><span class="line">  <span class="keyword">if</span> (stats.errors.length) <span class="keyword">return</span></span><br><span class="line">  // <span class="keyword">read</span> bundle <span class="keyword">generated</span> <span class="keyword">by</span> vue-ssr-webpack-<span class="keyword">plugin</span></span><br><span class="line">  bundle = JSON.parse(readFile(mfs, <span class="string">'vue-ssr-server-bundle.json'</span>))</span><br><span class="line">  <span class="keyword">update</span>()</span><br><span class="line">&#125;)</span><br><span class="line">// <span class="keyword">read</span> <span class="keyword">template</span> <span class="keyword">from</span> disk <span class="keyword">and</span> watch</span><br><span class="line"><span class="keyword">template</span> = fs.readFileSync(templatePath, <span class="string">'utf-8'</span>)</span><br><span class="line">chokidar.watch(templatePath).on(<span class="string">'change'</span>, () =&gt; &#123;</span><br><span class="line">  <span class="keyword">template</span> = fs.readFileSync(templatePath, <span class="string">'utf-8'</span>)</span><br><span class="line">  console.log(<span class="string">'index.html template updated.'</span>)</span><br><span class="line">  hotMiddleware.publish(&#123; <span class="keyword">action</span>: <span class="string">'reload'</span> &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<h2 id="修改-build-js"><a href="#修改-build-js" class="headerlink" title="修改 build.js"></a>修改 build.js</h2><p>修改点比较简单，在 client 端编译完后，再增加编译 server 端就可以。最后修改一下 package.json 的命令。<br><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm <span class="keyword">run</span><span class="bash"> dev</span></span><br><span class="line">npm <span class="keyword">run</span><span class="bash"> build</span></span><br><span class="line">npm <span class="keyword">run</span><span class="bash"> server // 启动服务器</span></span><br></pre></td></tr></table></figure></p>
+<p>更多的代码可以使用脚手架模板创建一个空项目跑一下看看。</p>
+<h2 id="Vue-js-SSR-Step-by-Step-系列"><a href="#Vue-js-SSR-Step-by-Step-系列" class="headerlink" title="Vue.js SSR Step by Step 系列"></a>Vue.js SSR Step by Step 系列</h2><ul>
+<li><a href="https://juejin.im/post/6844903507556843534" target="_blank" rel="noopener">Vue.js SSR Step by Step (1) - 实现简单的client-only vue-webpack 配置</a></li>
+<li><a href="https://juejin.im/post/6844903509050015758" target="_blank" rel="noopener">Vue.js SSR Step by Step (2) - 一个简单的同构DEMO</a></li>
+</ul>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+        <li>
+            <a target="_blank" href="https://www.zhihu.com/people/wheato">
+                            <span class="fa-stack fa-lg">
+                                 <i class="iconfont icon-zhihu"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+        <li>
+            <a target="_blank" href="http://weibo.com/wheato">
+                            <span class="fa-stack fa-lg">
+                                  <i class="iconfont icon-weibo"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/wheato">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+</html>

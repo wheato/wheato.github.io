@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        Vue.js SSR Step by Step (2) - 一个简单的同构DEMO - 麦子前端铺
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> Code with my mind, code for my dream! </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar radius">
+            <img src="/img/avatar.jpg" />
+        </div>
+        <div class="name">
+            <i>Wheato Wu</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>主页</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archive">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>存档</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            
+            <li>
+                <a id="search">
+                    <i class="iconfont icon-sousuo1"></i>
+                    <span>搜索</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#改写入口"><span class="toc-text">改写入口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改写-webpack-配置"><span class="toc-text">改写 webpack 配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#server-js"><span class="toc-text">server.js</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增加前端方法"><span class="toc-text">增加前端方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#简单的数据注入"><span class="toc-text">简单的数据注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-text">参考</span></a></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">搜索</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+
+        <div class="index-about-mobile">
+            <i> Code with my mind, code for my dream! </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        Vue.js SSR Step by Step (2) - 一个简单的同构DEMO
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">发布于：<span>2017-11-08 18:28:49</span></span>
+        
+        <span class="attr">标签：/
+        
+        <a class="tag" href="/tags/#Vue" title="Vue">Vue</a>
+        <span>/</span>
+        
+        
+        </span>
+        <span class="attr">访问：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content no-indent">
+        <p>上一篇文章中介绍了如何从零开始搭建一个简单的 client-only webpack 配置。<br>接下来我们在前面代码的基础上写一个简单的前后端同构的DEMO。</p>
+<h2 id="改写入口"><a href="#改写入口" class="headerlink" title="改写入口"></a>改写入口</h2><blockquote>
+<p>当编写纯客户端(client-only)代码时，我们习惯于每次在新的上下文中对代码进行取值。但是，Node.js 服务器是一个长期运行的进程。当我们的代码进入该进程时，它将进行一次取值并留存在内存中。这意味着如果创建一个单例对象，它将在每个传入的请求之间共享。  </p>
+<p>为了避免状态单例，改写入口， <a href="https://ssr.vuejs.org/zh/structure.html" target="_blank" rel="noopener">Vue SSR 官方文档</a>介绍的比较详细了，一定要去看一看。<br>创建对应的文件后，src 目录是这样的：<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── <span class="selector-tag">App</span><span class="selector-class">.vue</span></span><br><span class="line">├── <span class="selector-tag">app</span><span class="selector-class">.js</span></span><br><span class="line">├── <span class="selector-tag">assets</span></span><br><span class="line">│   └── <span class="selector-tag">logo</span><span class="selector-class">.png</span></span><br><span class="line">├── <span class="selector-tag">entry-client</span><span class="selector-class">.js</span></span><br><span class="line">└── <span class="selector-tag">entry-server</span><span class="selector-class">.js</span></span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>改写 app.js 把里面创建 Vue 实例的部分改写一个工厂函数，用于创建返回 Vue 实例。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// app.js</span></span><br><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span></span><br><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App.vue'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">createApp</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> app = <span class="keyword">new</span> Vue(&#123;</span><br><span class="line">    render: <span class="function"><span class="params">h</span> =&gt;</span> h(App)</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">return</span> app</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// entry-client.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; createApp &#125; <span class="keyword">from</span> <span class="string">'./app.js'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = createApp()</span><br><span class="line">app.$mount(<span class="string">'#app'</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// entry-server.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; createApp &#125; <span class="keyword">from</span> <span class="string">'./app.js'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> context =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> app = createApp()</span><br><span class="line">  <span class="keyword">return</span> app</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="改写-webpack-配置"><a href="#改写-webpack-配置" class="headerlink" title="改写 webpack 配置"></a>改写 webpack 配置</h2><p>因为服务器渲染的配置和客户端的配置略有不同，但其中有很多共用的配置，官方建议我们使用三个不同的配置文件：base、client、server， 通过 <strong>webpack-merge</strong> 插件来实现对 base 配置文件的覆盖和扩展。<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">build</span> 目录下的文件目录</span><br><span class="line">.</span><br><span class="line">├── <span class="selector-tag">webpack</span><span class="selector-class">.base</span><span class="selector-class">.conf</span><span class="selector-class">.js</span></span><br><span class="line">├── <span class="selector-tag">webpack</span><span class="selector-class">.client</span><span class="selector-class">.conf</span><span class="selector-class">.js</span></span><br><span class="line">└── <span class="selector-tag">webpack</span><span class="selector-class">.server</span><span class="selector-class">.conf</span><span class="selector-class">.js</span></span><br></pre></td></tr></table></figure></p>
+<p>再把之前 webpack.config.js 中的内容复制到 webpack.base.conf.js 中。在 webpack.server.conf.js 中加入 SSR 的 client 插件。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">'webpack'</span>)</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>)</span><br><span class="line"><span class="keyword">const</span> merge = <span class="built_in">require</span>(<span class="string">'webpack-merge'</span>)</span><br><span class="line"><span class="keyword">const</span> baseConfig = <span class="built_in">require</span>(<span class="string">'./webpack.base.conf'</span>)</span><br><span class="line"><span class="keyword">const</span> VueSSRClientPlugin = <span class="built_in">require</span>(<span class="string">'vue-server-renderer/client-plugin'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = merge(baseConfig, &#123;</span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> VueSSRClientPlugin()</span><br><span class="line">  ]</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>客户端的配置就完成了。server 端需要修改输入和输出的配置，还有 source-map 输出的格式，module 中 引入的 css 文件不打包到 module 中，增加 SSR 的 server 端插件。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">'webpack'</span>)</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>)</span><br><span class="line"><span class="keyword">const</span> merge = <span class="built_in">require</span>(<span class="string">'webpack-merge'</span>)</span><br><span class="line"><span class="keyword">const</span> baseConfig = <span class="built_in">require</span>(<span class="string">'./webpack.base.conf'</span>)</span><br><span class="line"><span class="keyword">const</span> nodeExternals = <span class="built_in">require</span>(<span class="string">'webpack-node-externals'</span>)</span><br><span class="line"><span class="keyword">const</span> VueSSRServerPlugin = <span class="built_in">require</span>(<span class="string">'vue-server-renderer/server-plugin'</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = merge(baseConfig, &#123;</span><br><span class="line">  entry: <span class="string">'./src/entry-server.js'</span>,</span><br><span class="line">  output: &#123;</span><br><span class="line">    filename: <span class="string">'server-bundle.js'</span>,</span><br><span class="line">    libraryTarget: <span class="string">'commonjs2'</span> <span class="comment">// 代码中模块的实现方式，Node.js 使用 commonjs2</span></span><br><span class="line">  &#125;,</span><br><span class="line">  target: <span class="string">'node'</span>, <span class="comment">// 指定代码的运行环境是 node</span></span><br><span class="line">  devtool: <span class="string">'#source-map'</span>,</span><br><span class="line">  externals: nodeExternals(&#123;</span><br><span class="line">    whitelist: <span class="regexp">/\.css$/</span></span><br><span class="line">  &#125;),</span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> VueSSRServerPlugin()</span><br><span class="line">  ]</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>然后在 package.json 中添加编译的命令：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"scripts"</span>: &#123;</span><br><span class="line">  <span class="string">"test"</span>: <span class="string">""</span>,</span><br><span class="line">  <span class="string">"dev"</span>: <span class="string">"cross-env NODE_ENV=development webpack-dev-server --open --hot --config build/webpack.client.conf.js"</span>,</span><br><span class="line">  <span class="string">"server"</span>: <span class="string">"node server.js"</span>,</span><br><span class="line">  <span class="string">"build"</span>: <span class="string">"rimraf dist &amp;&amp; npm run build:client &amp;&amp; npm run build:server"</span>,</span><br><span class="line">  <span class="string">"build:client"</span>: <span class="string">"cross-env NODE_ENV=production webpack --config build/webpack.client.conf.js --progress --hide-modules"</span>,</span><br><span class="line">  <span class="string">"build:server"</span>: <span class="string">"cross-env NODE_ENV=production webpack --config build/webpack.server.conf.js --progress --hide-modules"</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>运行 <code>nom run build</code> 在dist 目录里就会生成构建后的文件，然后把 index.html 修改为 indext.template.html 这个文件名随便，不改也行。dist 目录中有两个不一样的文件，vue-ssr-client-manifest.json 和 vue-ssr-server-bundle.json。具体的使用方法和实现方式，文档写的很清楚，先去 <a href="https://ssr.vuejs.org/zh/bundle-renderer.html" target="_blank" rel="noopener">Bundle Renderer 指引 · GitBook</a> 看看。</p>
+<h2 id="server-js"><a href="#server-js" class="headerlink" title="server.js"></a>server.js</h2><p>然后在写一个简单 Node Server，我这里使用 Koa，其他的都是一样。server.js 的内容如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Koa = <span class="built_in">require</span>(<span class="string">'koa'</span>)</span><br><span class="line"><span class="keyword">const</span> Vue = <span class="built_in">require</span>(<span class="string">'vue'</span>)</span><br><span class="line"><span class="keyword">const</span> &#123; createBundleRenderer &#125; = <span class="built_in">require</span>(<span class="string">'vue-server-renderer'</span>)</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>)</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>)</span><br><span class="line"><span class="keyword">const</span> serverBundle = <span class="built_in">require</span>(<span class="string">'./dist/vue-ssr-server-bundle.json'</span>)</span><br><span class="line"><span class="keyword">const</span> clientManifest = <span class="built_in">require</span>(<span class="string">'./dist/vue-ssr-client-manifest.json'</span>)</span><br><span class="line"><span class="keyword">const</span> app = <span class="keyword">new</span> Koa()</span><br><span class="line"><span class="keyword">const</span> template = fs.readFileSync(path.resolve(__dirname, <span class="string">'./index.template.html'</span>), <span class="string">'utf-8'</span>)</span><br><span class="line"><span class="keyword">const</span> renderer = createBundleRenderer(serverBundle, &#123;</span><br><span class="line">  basedir: path.resolve(__dirname, <span class="string">'./dist'</span>),</span><br><span class="line">  runInNewContext: <span class="literal">false</span>,</span><br><span class="line">  template,</span><br><span class="line">  clientManifest</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> renderToString = <span class="function"><span class="keyword">function</span> (<span class="params">context</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    renderer.renderToString(context, (err, html) =&gt; &#123;</span><br><span class="line">      <span class="keyword">if</span> (err) reject(err)</span><br><span class="line">      resolve(html)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">app.use(<span class="keyword">async</span> ctx =&gt; &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(ctx.req.url)</span><br><span class="line">  <span class="keyword">if</span> (ctx.req.url === <span class="string">'/favicon.ico'</span> || ctx.req.url === <span class="string">'/robots.txt'</span>) &#123;</span><br><span class="line">    ctx.body = <span class="string">''</span></span><br><span class="line">    <span class="keyword">return</span> </span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 简单的静态文件处理</span></span><br><span class="line">  <span class="keyword">if</span> (ctx.req.url.indexOf(<span class="string">'/dist/'</span>) &gt; <span class="number">-1</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> urlpath = ctx.req.url.split(<span class="string">'?'</span>)[<span class="number">0</span>].slice(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">const</span> filepath = path.resolve(__dirname, <span class="string">'./'</span>, urlpath)</span><br><span class="line">    ctx.body = fs.readFileSync(filepath)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">let</span> html = <span class="string">''</span></span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    html = <span class="keyword">await</span> renderToString(&#123;&#125;)</span><br><span class="line">  &#125; <span class="keyword">catch</span>(err) &#123;</span><br><span class="line">    ctx.throw(<span class="number">500</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line">  ctx.body = html  </span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">app.listen(<span class="number">3000</span>)</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'Server listening on http://localhost:3000.'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>运行 <code>nom run server</code> 就可以看到服务器渲染出来的页面了。<br><img src="https://user-gold-cdn.xitu.io/2017/11/6/b47cd1451803665e00fd32bfe8066e48" alt></p>
+<h2 id="增加前端方法"><a href="#增加前端方法" class="headerlink" title="增加前端方法"></a>增加前端方法</h2><p>这只是一个简单的静态页面，没有 js 方法动态创建一些内容，我们再添加一些前端方法，看看渲染出来的页面中客户端 js 的运行是不是可以的。<br>修改 App.vue 文件：<br><figure class="highlight django"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span></span><br><span class="line"><span class="xml">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"demo"</span> <span class="attr">id</span>=<span class="string">"app"</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Simple-webpack demo<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>这是一个简单的 Vue demo<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"./assets/logo.png"</span> <span class="attr">alt</span>=<span class="string">""</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>测试一下 SSR<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">v-for</span>=<span class="string">"(text, index) in textArr"</span> <span class="attr">:key</span>=<span class="string">"index"</span>&gt;</span></span><span class="template-variable">&#123;&#123; text &#125;&#125;</span><span class="xml"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">button</span> @<span class="attr">click</span>=<span class="string">"clickHandler"</span>&gt;</span>新增一个行文字<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span></span><br><span class="line"><span class="xml">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span></span><br><span class="line"><span class="xml">export default &#123;</span></span><br><span class="line"><span class="xml">  data () &#123;</span></span><br><span class="line"><span class="xml">    return &#123;</span></span><br><span class="line"><span class="xml">      textArr: []</span></span><br><span class="line"><span class="xml">    &#125;</span></span><br><span class="line"><span class="xml">  &#125;,</span></span><br><span class="line"><span class="xml">  methods: &#123;</span></span><br><span class="line"><span class="xml">    clickHandler () &#123;</span></span><br><span class="line"><span class="xml">      this.textArr.push(`$&#123;this.textArr.length + 1&#125;. 这是新增的文字。`)</span></span><br><span class="line"><span class="xml">    &#125;</span></span><br><span class="line"><span class="xml">  &#125;</span></span><br><span class="line"><span class="xml">&#125;</span></span><br><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure></p>
+<p>然后再次构建整个工程，重新启动服务器。<br><img src="https://user-gold-cdn.xitu.io/2017/11/6/8f056847f964d2bafae16c2df8c3b4e9" alt><br>Success！</p>
+<h2 id="简单的数据注入"><a href="#简单的数据注入" class="headerlink" title="简单的数据注入"></a>简单的数据注入</h2><p>比如渲染一个新闻页面，希望网页的标题是页面直接渲染出来的？应该怎么做？Vue.js SSR 提供了方法，能够插入模板变量。只要在 index.template.html 中加入模板变量就可以像其他的后端模板一样插入数据。首先修改一下 index.template.html 中，增加 <code>title</code> 变量，<code>&lt;title&gt;SSR demo - Vue.js SSR Step by Step (2) - 一个简单的同构DEMO&lt;/title&gt;</code> 。<br>然后在 server.js 中的 <code>renderToString</code>方法中的第一个参数传入 <code>{ title: &#39;第一个 SSR Demo&#39;}</code>。<br>最后再重启一下后台服务，如下图，我们的页面标题变成了我们定义的了。<br><img src="https://user-gold-cdn.xitu.io/2017/11/6/7cac66b02e16b7589bc202401693503a" alt></p>
+<p>如果还想更复杂的数据我们只能用注入一个 window 全局变量了。这个时候我们还没办法用组件的静态方法，通过后台服务去注入，因为我们没有用到router，不知道app中的组件是不是已经实例化，没办法去获取组件里的静态方法。借鉴 SSR 官方中的 <code>window.__INIT_STATE</code> 的方式，先在 index.template.html 中 增加一个 script 标签加入模板变量，然后在 server.js 中传入数据，最后修改 App.vue 文件在 <code>mounted</code> 中判断获取这个变量，将变量赋值给组件的 <code>data</code> 属性中，具体的代码如下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- index.template.html --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">"en"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"X-UA-Compatible"</span> <span class="attr">content</span>=<span class="string">"ie=edge"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>SSR demo - &#123;&#123; title &#125;&#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="handlebars"><span class="xml">    </span><span class="template-variable">&#123;&#123;&#123; injectData &#125;&#125;&#125;</span></span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!--vue-ssr-outlet--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// server.js</span></span><br><span class="line">html = <span class="keyword">await</span> renderToString(&#123;</span><br><span class="line">  title: <span class="string">'第一个 SSR Demo'</span>,</span><br><span class="line">  injectData: <span class="string">'window.__INIT_DATA__ = '</span> + <span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">    text: <span class="string">'这是服务器注入的数据。'</span></span><br><span class="line">  &#125;) </span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- App.vue --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"demo"</span> <span class="attr">id</span>=<span class="string">"app"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Simple-webpack demo<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>这是一个简单的 Vue demo<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"./assets/logo.png"</span> <span class="attr">alt</span>=<span class="string">""</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>测试一下 SSR<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span> &#123;&#123; serverData.text &#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">v-for</span>=<span class="string">"(text, index) in textArr"</span> <span class="attr">:key</span>=<span class="string">"index"</span>&gt;</span>&#123;&#123; text &#125;&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> @<span class="attr">click</span>=<span class="string">"clickHandler"</span>&gt;</span>新增一个行文字<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span></span><br><span class="line">  data () &#123;</span><br><span class="line"><span class="actionscript">    <span class="keyword">return</span> &#123;</span></span><br><span class="line">      textArr: [],</span><br><span class="line"><span class="actionscript">      serverData: <span class="string">''</span></span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  mounted () &#123;</span><br><span class="line"><span class="javascript">    <span class="keyword">this</span>.serverData = <span class="built_in">window</span>.__INIT_DATA__</span></span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    clickHandler () &#123;</span><br><span class="line"><span class="javascript">      <span class="keyword">this</span>.textArr.push(<span class="string">`<span class="subst">$&#123;<span class="keyword">this</span>.textArr.length + <span class="number">1</span>&#125;</span>. 这是新增的文字。`</span>)</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>重新编译，重启服务后，页面上就会多一段文字了，如下图所示：<br><img src="https://user-gold-cdn.xitu.io/2017/11/6/36eba657b6c3a6f1ef46b40441355aab" alt></p>
+<p>Success！<br>所有的代码都在这个上面 <a href="https://github.com/wheato/ssr-step-by-step/tree/master/simple-ssr-demo" target="_blank" rel="noopener">wheato/ssr-step-by-step</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://ssr.vuejs.org/zh/" target="_blank" rel="noopener">Vue.js 服务器端渲染指南</a></p>
+
+        
+        <br />
+        <div id="comment-container">
+        </div>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
+        </div>
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+        <li>
+            <a target="_blank" href="https://www.zhihu.com/people/wheato">
+                            <span class="fa-stack fa-lg">
+                                 <i class="iconfont icon-zhihu"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+        <li>
+            <a target="_blank" href="http://weibo.com/wheato">
+                            <span class="fa-stack fa-lg">
+                                  <i class="iconfont icon-weibo"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+        
+        <li>
+            <a target="_blank"  href="https://github.com/wheato">
+                            <span class="fa-stack fa-lg">
+                                <i class="iconfont icon-github"></i>
+                            </span>
+            </a>
+        </li>
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = "search.json"
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+</html>
